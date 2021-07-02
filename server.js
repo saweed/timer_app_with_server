@@ -31,7 +31,7 @@ app.post('/api/timers', (req, res) => {
     const timers = JSON.parse(data);
     const newTimer = {
       title: req.body.title,
-      project: req.body.project,
+      description: req.body.description,
       id: req.body.id,
       elapsed: 0,
       runningSince: null,
@@ -60,6 +60,7 @@ app.post('/api/timers/start', (req, res) => {
 
 app.post('/api/timers/stop', (req, res) => {
   fs.readFile(DATA_FILE, (err, data) => {
+    const timers = JSON.parse(data);
     timers.forEach((timer) => {
       if (timer.id === req.body.id) {
         const delta = req.body.stop - timer.runningSince;
@@ -79,7 +80,7 @@ app.put('/api/timers', (req, res) => {
     timers.forEach((timer) => {
       if (timer.id === req.body.id) {
         timer.title = req.body.title;
-        timer.project = req.body.project;
+        timer.description = req.body.description;
       }
     });
     fs.writeFile(DATA_FILE, JSON.stringify(timers, null, 4), () => {

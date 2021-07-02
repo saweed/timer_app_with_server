@@ -14,7 +14,7 @@ export default class App extends Component {
 
     componentDidMount() {
         this.loadTimersFromServer();
-        setInterval(this.loadTimersFromServer, 15000);
+        //setInterval(this.loadTimersFromServer, 15000);
     }
 
     loadTimersFromServer = () => {
@@ -28,34 +28,23 @@ export default class App extends Component {
     };
     createTimer = (timer) => {
         const t = newTimer(timer);
-        this.setState({timers: this.state.timers.concat(t)});
+        client.createTimer(t).then(this.loadTimersFromServer);
+        //this.setState({timers: this.state.timers.concat(t)});
     };
     handleEditFormSubmit = (attrs) => {
         this.updateTimer(attrs);
     };
     updateTimer = (attrs) => {
-        this.setState({
-            timers: this.state.timers.map((timer) => {
-                if (timer.id === attrs.id) {
-                    return Object.assign({}, timer, {
-                        title: attrs.title,
-                        description: attrs.description
-                    });
-                }
-                else
-                {
-                    return timer;
-                }
-            })
-        });
+        client.updateTimer(attrs).then(this.loadTimersFromServer);
     };
     handleTrashClick = (timerId) => {
         this.deleteTimer(timerId);
     };
     deleteTimer = (timerId) => {
-        this.setState({
-            timers: this.state.timers.filter(t => t.id !== timerId)
-        });
+        client.deleteTimer({id: timerId}).then(this.loadTimersFromServer);
+        // this.setState({
+        //     timers: this.state.timers.filter(t => t.id !== timerId)
+        // });
     };
     handleStartClick = (timerId) => {
         this.startTimer(timerId);
