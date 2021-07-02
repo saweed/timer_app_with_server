@@ -5,25 +5,22 @@ import EditableTimerList from './components/EditableTimerList';
 import ToggleableTimerForm from './components/ToggleableTimerForm';
 import { newTimer } from './helpers';
 import { v4 as uuidv4 } from 'uuid';
+import client from './client';
 
 export default class App extends Component {
     state = {
-        timers: [
-            {
-                title: "First Timer" ,
-                description: "1st test timer" ,
-                elapsed: Date.now(),
-                passed: null,
-                id: uuidv4()
-            },
-            {
-                title: "Second Timer" ,
-                description: "2nd test timer" ,
-                elapsed: null,
-                passed: null,
-                id: uuidv4()
-            }
-        ]
+        timers: []
+    };
+
+    componentDidMount() {
+        this.loadTimersFromServer();
+        setInterval(this.loadTimersFromServer, 15000);
+    }
+
+    loadTimersFromServer = () => {
+        client.getTimers((serverTimers) => (
+            this.setState({ timers: serverTimers })
+        ));
     };
 
     handleCreateFormSubmit = (timer) => {
@@ -79,22 +76,15 @@ export default class App extends Component {
                 }
             })
         });
+        client.startTimer(
+            { id: timerId, start: now }
+        );
     };
     stopTimer = (timerId) => {
         const now = Date.now();
-        this.setState({
-            timers: this.state.timers.map((timer) => {
-                if (timer.id === timerId) {
-                    const lastElapsed = now - timer.passed;
-                    return Object.assign({}, timer, {
-                        elapsed: timer.elapsed + lastElapsed,
-                        passed: null,
-                    });
-                } else {
-                    return timer;
-                }
-            }),
-        });
+        client.stopTimer(
+            { id: timerId, stop: now }
+        ).then(this.loadTimersFromServer);
     };
     render() {
         return (
